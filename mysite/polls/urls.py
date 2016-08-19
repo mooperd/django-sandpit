@@ -1,12 +1,10 @@
 from django.conf.urls import url
-from polls.views import VpcCreate, VpcUpdate, VpcDelete
-from . import views
+from views import VpcCreate, VpcUpdate, VpcDelete, index, VpcFormView
 
-app_name = 'polls'
 urlpatterns = [
-    # ex: /polls/
-    url(r'^$', views.index, name='index'),
-    url(r'vpc/add/$', VpcCreate.as_view(), name='vpc-add'),
-    url(r'vpc/(?P<pk>[0-9]+)/$', VpcUpdate.as_view(), name='vpc-update'),
-    url(r'vpc/(?P<pk>[0-9]+)/delete/$', VpcDelete.as_view(), name='vpc-delete'),
+    url(r'^$', index, name='index'),
+    url(r'^vpc/add/?$', VpcCreate.as_view(), name='vpc-add'),
+    url(r'^vpc/addall/?$',VpcFormView.as_view(), name='vpc-add-all'),
+    url(r'^vpc/(?P<pk>[0-9]+)/?$', VpcUpdate.as_view(), name='vpc-update'),
+    url(r'^vpc/(?P<pk>[0-9]+)/delete/?$', VpcDelete.as_view(), name='vpc-delete'),
 ]

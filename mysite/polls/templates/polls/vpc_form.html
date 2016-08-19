@@ -1,5 +1,18 @@
-<form action="polls/vpc/add/" method="post">{% csrf_token %}
-    <label for="your_name">Your name: </label>
-    <input id="your_name" type="text" name="your_name" value="tits">
-    <input type="submit" value="OK">
-</form>
+{% extends 'base.html' %}
+{% load bootstrap %}
+
+{% block main_contents %}
+    <div class="row">
+        <div class="table-bordered col-lg-offset-2 col-lg-8 col-md-10 col-md-offset-1">
+            <form method="post" role="form">
+                {% csrf_token %}
+                {{ formA|bootstrap }}
+                {{ formB|bootstrap }}
+                {{ formC|bootstrap }}
+                <div class="form-group pull-right">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

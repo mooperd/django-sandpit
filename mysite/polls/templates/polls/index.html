@@ -1,9 +1,27 @@
-{% for vpc in vpc_list %}
-<div> {{vpc.id}},{{vpc.dhcp_options_id}},{{vpc.state}},{{vpc.cidr_block}},{{vpc.is_default}}, </div>
-{% endfor %}
+{% extends 'base.html' %}
+{% block main_contents %}
+    <table class="table table-bordered table-responsive">
+        <thead >
+        <tr>
+            <td>VPC ID</td>
+            <td>DHCP Option</td>
+            <td>State</td>
+            <td>CIDR</td>
+            <td>isDefault</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for vpc in vpc_list %}
+            <tr>
+                <td>{{ vpc.id }}</td>
+                <td>{{ vpc.dhcp_options_id }}</td>
+                <td>{{ vpc.state }}</td>
+                <td>{{ vpc.cidr_block }}</td>
+                <td>{{ vpc.is_default }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
 
-<form action="polls/vpc/add/" method="post">{% csrf_token %}
-    <label for="your_name">Your name: </label>
-    <input id="your_name" type="text" name="your_name" value="tits">
-    <input type="submit" value="OK">
-</form>
+
+    </table>
+{% endblock %}
