@@ -1,16 +1,20 @@
-from . import CloudProvider, log
-import boto, boto.ec2, boto.iam, boto.vpc, time
-import json
+import boto
+import boto.ec2
+import boto.iam
+import boto.vpc
+import time
 from jinja2 import Template
+
+from . import CloudProvider, log
 
 # wait 5 seconds before retrying after failed requests
 WAITING_TIME = 5
 CREDENTIALS_FILE_NAME = "aws_credentials.json"
 TEMPLATE_FILE_NAME = "aws_subnet_policy.jinja"
 
-class AWSProvider(CloudProvider):
 
-###############################################################################
+class AWSProvider(CloudProvider):
+    ###############################################################################
     _config_path = None
     _credentials = None
     _ec2_conn = None
@@ -40,40 +44,36 @@ class AWSProvider(CloudProvider):
 
     def _get_ec2_connection(self, region_name):
         if not self._ec2_conn:
-            #credentials = self._get_credentials()
+            # credentials = self._get_credentials()
             self._ec2_conn = boto.ec2.connect_to_region(
                 region_name=region_name,
-                #aws_access_key_id=credentials['id'],
-                #aws_secret_access_key=credentials['key']
+                # aws_access_key_id=credentials['id'],
+                # aws_secret_access_key=credentials['key']
             )
         return self._ec2_conn
 
-
     def _get_vpc_connection(self, region_name):
         if not self._vpc_conn:
-            #credentials = self._get_credentials()
+            # credentials = self._get_credentials()
             self._vpc_conn = boto.vpc.connect_to_region(
                 region_name=region_name,
-                #aws_access_key_id=credentials['id'],
-                #aws_secret_access_key=credentials['key']
+                # aws_access_key_id=credentials['id'],
+                # aws_secret_access_key=credentials['key']
             )
         return self._vpc_conn
 
-
     def _get_iam_connection(self):
         if not self._iam_conn:
-            #credentials = self._get_credentials()
+            # credentials = self._get_credentials()
             self._iam_conn = boto.connect_iam(
-                #aws_access_key_id=credentials['id'],
-                #aws_secret_access_key=credentials['key']
+                # aws_access_key_id=credentials['id'],
+                # aws_secret_access_key=credentials['key']
             )
         return self._iam_conn
-
 
     def _tag_with_name(self, item, name):
         """ This function will tag a resource with a name """
         item.add_tag('Name', name)
-
 
     def _generate_subnet_policy(self, region_name, subnet_id):
         account_id = self._get_credentials()["account_id"]
@@ -84,7 +84,6 @@ class AWSProvider(CloudProvider):
                 region_name=region_name,
                 subnet_id=subnet_id
             )
-
 
     ###########################################################################
 
@@ -101,7 +100,6 @@ class AWSProvider(CloudProvider):
         iam_conn.add_role_to_instance_profile(profile_name, role_name)
         iam_conn.put_role_policy(role_name, profile_name, policy)
         return role_name, profile_name
-
 
     def create_instance(self, region, subnet_id, name, is_privileged=False):
         """ Creates an instance """
@@ -154,7 +152,6 @@ class AWSProvider(CloudProvider):
 
         return reservation.instances[0].id, key_pair
 
-
     def create_vpc(self, vpc_name, vpc_region, cidr_block):
         """ Creates a VPC """
         log(
@@ -167,7 +164,6 @@ class AWSProvider(CloudProvider):
         self._tag_with_name(vpc, vpc_name)
         return vpc.id
 
-
     def shutdown_all_instances_in_subnet(self, region_name, subnet_id):
         conn = self._get_ec2_connection(region_name)
 
@@ -176,7 +172,7 @@ class AWSProvider(CloudProvider):
 
         # find all instances in subnet
         for reservation in conn.get_all_reservations(
-            filters=[("subnet-id", subnet_id)]
+                filters=[("subnet-id", subnet_id)]
         ):
             for instance in reservation.instances:
                 # set instance block devices to 'terminate on shutdown'
@@ -215,7 +211,6 @@ class AWSProvider(CloudProvider):
                 except boto.exception.EC2ResponseError:
                     time.sleep(WAITING_TIME)
 
-
     def delete_subnet(self, region_name, subnet_id):
         vpc_conn = self._get_vpc_connection(region_name)
         log(
@@ -232,8 +227,6 @@ class AWSProvider(CloudProvider):
             except boto.exception.EC2ResponseError as e:
                 if (e.code == "DependencyViolation"):
                     time.sleep(5)
-
-
 
     def delete_vpc(self, region_name, vpc_id):
         """ Completely deletes a VPC with all its subnets and instances """
@@ -260,8 +253,6 @@ class AWSProvider(CloudProvider):
                 if (e.code == "DependencyViolation"):
                     time.sleep(5)
 
-
-
     def create_subnet(self, region_name, vpc_id, subnet_name, cidr_block, availability_zone):
         log(
             availability_zone,
@@ -272,7 +263,6 @@ class AWSProvider(CloudProvider):
         subnet = conn.create_subnet(vpc_id, cidr_block, availability_zone)
         self._tag_with_name(subnet, subnet_name)
         return subnet.id
-
 
     def get_vpc_status(self, region_name, vpc_id):
         vpc_conn = self._get_vpc_connection(region_name)
@@ -293,7 +283,6 @@ class AWSProvider(CloudProvider):
             if address.public_ip:
                 return True
         return False
-
 
     """ This function enables us to view the permissions that we have just created
 
